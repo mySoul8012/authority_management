@@ -1,0 +1,47 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/security
+        https://www.springframework.org/schema/security/spring-security.xsd">
+	<security:global-method-security secured-annotations="enabled"/>
+
+
+	<!-- 配置不拦截的资源 -->
+	<security:http pattern="/index.jsp" security="none"/>
+	<security:http pattern="/css/**" security="none"/>
+	<security:http pattern="/img/**" security="none"/>
+	<security:http pattern="/js/**" security="none"/>
+	<security:http pattern="/plugins/**" security="none"/>
+	<security:http pattern="/plugins/**/**" security="none"/>
+	<security:http pattern="/plugins/**/**/**" security="none"/>
+
+
+	<!-- auto-config 不用自己编写登录界面，框架默认提供登录界面   false 是否使用spel表达式 -->
+	<security:http auto-config="true" use-expressions="false">
+		<!-- 配置拦截规则 -->
+		<security:intercept-url pattern="/**" access="ROLE_USER, ROLE_ADMIN, ROLE_vip"/>
+		
+		<!-- 定义跳转页面 -->
+		<security:form-login
+			 login-page="/index.jsp"
+			 login-processing-url="/login.do"
+			 authentication-failure-url="/login/error.do"
+			 authentication-success-forward-url="/login/success.do"
+		/>
+		
+		<security:csrf disabled="true"/>
+		
+		<security:logout invalidate-session="true" logout-url="/logout.do" logout-success-url="/index.jsp"/>
+	</security:http>
+	
+	<security:authentication-manager>
+		<security:authentication-provider user-service-ref="userService">
+			<!-- 加密方式 -->
+			<!--<security:password-encoder ref="passwordEncoder"/>-->
+		</security:authentication-provider>
+	</security:authentication-manager>
+	
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+</beans>
